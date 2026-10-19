@@ -94,3 +94,104 @@ static esp_err_t stream_handler(httpd_req_t *req)
     return res;
 }
 // Стрийм серверийг эхлүүлэх функц
+void startCameraServer()
+{
+    httpd_config_t config = HTTPD_DEFAULT_CONFIG();
+    config.server_port = 80;
+
+    httpd_uri_t stream_uri = {
+        .uri = "/stream",
+        .method = HTTP_GET,
+        .handler = stream_handler,
+        .user_ctx = NULL};
+
+    if (httpd_start(&camera_httpd, &config) == ESP_OK)
+    {
+        httpd_register_uri_handler(camera_httpd, &stream_uri);
+        Serial.println("Camera Stream Server Started Successfully!");
+    }
+}
+
+// Зайг шалгах функц
+float getUltrasonicDistance()
+{
+    digitalWrite(trigPin, LOW);
+    delayMicroseconds(2);
+    digitalWrite(trigPin, HIGH);
+    delayMicroseconds(10);
+    digitalWrite(trigPin, LOW);
+
+    long duration = pulseIn(echoPin, HIGH, 30000); // 30ms timeout
+    if (duration == 0)
+    {
+        return 999.0;
+    }
+
+    return duration * 0.034 / 2;
+}
+
+void setup()
+{
+    Serial.begin(115200);
+
+    // Wi-Fi холболт үүсгэх (Стрийм явуулахад заавал шаардлагатай)
+    WiFi.begin(ssid, password);
+    while (WiFi.status() != WL_CONNECTED)
+    {
+        delay(500);
+        Serial.print(".");
+    }
+    Serial.println("\nWiFi Connected!");
+    Serial.print("Stream URL: http://");
+    Serial.print(WiFi.localIP());
+    Serial.println("/stream");
+
+    // HC-SR04 пинүүдийг тохируулах
+    pinMode(trigPin, OUTPUT);
+    pinMode(echoPin, INPUT);
+
+    if (!initCamera())
+    {
+        Serial.println("Camera init failed");
+        while (true)
+            delay(1000);
+    }
+
+    // BLE болон Камерын вэб стрим серверийг асаах
+    initBle();
+    startCameraServer();
+}
+
+static ObstacleState obstacleState;
+
+void loop()
+{
+    // Эхлээд ультрасоник мэдрэгчээр 1.5 метрийн дотор саад байгаа эсэхийг шалгах
+    float distance = getUltrasonicDistance();
+
+    // Хэрэв саад 1.5 метрээс хол байвал камерыг ажиллуулахгүйгээр алгасах
+    if (distance > 150.0)
+    {
+        Serial.println("Zam cholootei (het hol)");
+        delay(200);
+        return;
+    }
+
+    Serial.print("Saad ilersen zai: ");
+    Serial.print(distance);
+    Serial.println(" cm.");
+
+    // Камерын зургийг авч боловсруулах
+    camera_fb_t *fb = esp_camera_fb_get();
+    if (!fb)
+        return;
+
+    Light light = detectTrafficLight(fb);
+    bool obstacle = detectObstacle(fb, obstacleState);
+    esp_camera_fb_return(fb);
+
+    const char *decision = decide(obstacle, light);
+    Serial.println(decision);
+    sendBle(decision);
+    delay(200);
+}
