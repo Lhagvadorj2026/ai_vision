@@ -6,8 +6,8 @@
 #include "ble_service.h"
 
 // Wi-Fi мэдээлэл (ESP32-CAM стрим цацахад локал IP ашиглана)
-const char *ssid = "YOUR_WIFI_SSID";
-const char *password = "YOUR_WIFI_PASSWORD";
+const char *ssid = "univision_99";
+const char *password = "88873304Aa";
 
 // HC-SR04 мэдрэгчийн пин холболтууд
 const int trigPin = 12;
@@ -61,17 +61,17 @@ static esp_err_t stream_handler(httpd_req_t *req)
 
         if (res == ESP_OK)
         {
-            size_t hlen = snprintf(part_buf, 64, "--123456789000000000000987654321\r\nContent-Type: image/jpeg\r\nContent-Length: %u\r\n\r\n", _jpg_buf_len);
+            size_t hlen = snprintf(part_buf, sizeof(part_buf), "--123456789000000000000987654321\r\nContent-Type: image/jpeg\r\nContent-Length: %u\r\n\r\n", _jpg_buf_len);
             // Энд httpd_req_send-ийг httpd_resp_send болгов
-            res = httpd_resp_send(req, part_buf, hlen);
+            res = httpd_resp_send_chunk(req, part_buf, hlen);
         }
         if (res == ESP_OK)
         {
-            res = httpd_resp_send(req, (char *)_jpg_buf, _jpg_buf_len);
+            res = httpd_resp_send_chunk(req, (char *)_jpg_buf, _jpg_buf_len);
         }
         if (res == ESP_OK)
         {
-            res = httpd_resp_send(req, "\r\n", 2);
+            res = httpd_resp_send_chunk(req, "\r\n", 2);
         }
 
         if (fb)
