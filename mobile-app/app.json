@@ -10,7 +10,23 @@
       "supportsTablet": true,
       "infoPlist": {
         "NSBluetoothAlwaysUsageDescription": "This app uses Bluetooth to connect with the ESP32-CAM device.",
-        "NSBluetoothPeripheralUsageDescription": "This app uses Bluetooth to communicate with ESP32-CAM."
+        "NSBluetoothPeripheralUsageDescription": "This app uses Bluetooth to communicate with ESP32-CAM.",
+        "NSLocalNetworkUsageDescription": "ESP32-CAM камерын дүрсийг дотоод Wi-Fi сүлжээгээр харуулна.",
+        "NSAppTransportSecurity": {
+          "NSAllowsLocalNetworking": true,
+          "NSAllowsArbitraryLoadsInWebContent": true,
+          "NSExceptionDomains": {
+            "10.0.0.0/8": {
+              "NSExceptionAllowsInsecureHTTPLoads": true
+            },
+            "172.16.0.0/12": {
+              "NSExceptionAllowsInsecureHTTPLoads": true
+            },
+            "192.168.0.0/16": {
+              "NSExceptionAllowsInsecureHTTPLoads": true
+            }
+          }
+        }
       },
       "bundleIdentifier": "com.softwarelhagvadorj.mobile-app"
     },
@@ -27,7 +43,8 @@
         "android.permission.BLUETOOTH_ADMIN",
         "android.permission.BLUETOOTH_CONNECT",
         "android.permission.BLUETOOTH_SCAN",
-        "android.permission.ACCESS_FINE_LOCATION"
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.INTERNET"
       ],
       "package": "com.softwarelhagvadorj.mobileapp"
     },
@@ -45,7 +62,8 @@
           ],
           "bluetoothAlwaysPermission": "Allow AI Vision to connect to ESP32 via Bluetooth."
         }
-      ]
+      ],
+      "./plugins/withCameraNetwork"
     ]
   }
 }

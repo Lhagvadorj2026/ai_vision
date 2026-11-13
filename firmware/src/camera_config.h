@@ -41,9 +41,10 @@ inline bool initCamera()
     c.pin_pwdn = PWDN_GPIO_NUM;
     c.pin_reset = RESET_GPIO_NUM;
     c.xclk_freq_hz = 20000000;
-    c.pixel_format = PIXFORMAT_RGB565;
+    c.pixel_format = PIXFORMAT_JPEG;
     c.frame_size = FRAMESIZE_QVGA; // 320x240
-    c.fb_count = 1;
+    c.jpeg_quality = 20;
+    c.fb_count = 2;
     c.fb_location = CAMERA_FB_IN_PSRAM;
     c.grab_mode = CAMERA_GRAB_LATEST;
     return esp_camera_init(&c) == ESP_OK;
