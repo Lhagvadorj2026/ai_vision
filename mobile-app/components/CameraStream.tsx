@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { AppState, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { WebView } from 'react-native-webview';
+
+const DEFAULT_CAMERA_URL = 'http://192.168.1.16/stream';
+
 type Props = {
   onStreamChange: (url: string | null) => void;
 };
 export default React.memo(function CameraStream({ onStreamChange }: Props) {
-  const [address, setAddress] = useState('');
+  const [address, setAddress] = useState(DEFAULT_CAMERA_URL);
   const [url, setUrl] = useState<string | null>(null);
   const [error, setError] = useState('');
   useEffect(() => {
